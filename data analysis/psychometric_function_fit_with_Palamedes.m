@@ -1,26 +1,23 @@
-% Marcin J Marzejon®
+% Marcin J Marzejonï¿½
 % based on: "Psychophysics. A practical Introduction" by F.A.A. Kingdom, N.
 % Prisn, 2nd edition, Elsevier 2016, Chapter 4.2, pp. 56-71)
 
-% clear all variables, terminal data, and close all opened MATLAB widnows
-clear
-close all
-clc
+% clear all variables, terminal data, and close all opened Matlab widnows
+clear; close all; clc
 
 % Provide stimulus levels (in dB scale):
-StimLevels = [-4.743074755 -2.041199827 -1.706962272 -1.426675036 -1.106982975...
-    -0.7572071394 -0.5060999336 -0.1547268666 0.1494034979 0.5307844348...
-    0.8278537032 3.935752033];
+StimLevels = [ __your_data__ ];
 % Provide number of 'yes' answers for various stimulus intensity. Match the
 % order to StimLevels values.
-NumDetected = [0 0 0 0 0 0 2 1 7 6 9 10];
+NumDetected = [ __your_data__ ];
 % number of trials at each brightness level:
-NumTrials = [10 10 10 10 10 10 10 10 10 10 10 10];
+NumTrials = [ __your_data__ ];
 % recalculate measured answers into percent (fraction detected)
 FracDetected = NumDetected./NumTrials;
 
-%% FITTING
 
+%% FITTING
+% Fitting parameters
 % Import logistic fot from Palamedes toolbox. You can also choose another
 % logistic function for your application.
 PF = @PAL_Logistic;
@@ -32,15 +29,14 @@ PF = @PAL_Logistic;
 paramsFree = [1 1 1 1];
 
 % provide the values range within the fit parameters will be searched
-searchGrid.alpha = -1:0.001:1;
-searchGrid.beta = logspace(0,3,202);
+searchGrid.alpha = StimLevels(1):0.001:StimLevels(length(StimLevels));
+searchGrid.beta = logspace(0,3,201);
 searchGrid.gamma = 0:0.05:0.3;
 searchGrid.lambda = 0:0.05:0.3;
 
-% FITTING
+% Fitting procedure
 [paramsValues, LL, exitflag, output] = PAL_PFML_Fit(StimLevels, NumDetected,...
     NumTrials, searchGrid, paramsFree, PF);
-
 
 % scenario': 1 indicates a succesful fit, a negative number indicates 
 %       that the likelihood function does not contain a global maximum.
@@ -82,19 +78,12 @@ xlabel('Relative stimulus brightness [dB]');
 ylabel('Fraction detected [%]');
 
 %%  Bootstrap analysis of the fit
-
-% grab init time
-tic;
-initime = cputime;
-
 % B specifies how many times the routine should simulate the experiment
-B = 10;
-
+B = 400;
 % run Bootstrap parametric analysis
 [SD paramsSim LLSim converged] = ...
     PAL_PFML_BootstrapParametric (StimLevels, NumTrials, paramsValues,...
     paramsFree, B, PF, 'searchGrid', searchGrid);
-
 %   'SD': 1x4 vector containing standard deviations of the PF's parameters
 %       across the B fits to simulated data. These are estimates of the
 %       standard errors of the parameter estimates.
@@ -121,9 +110,6 @@ disp(['Dev: ' num2str(Dev)])
 %   'converged': For each simulation contains a 1 in case the fit was
 %       succesfull (i.e., converged) or a 0 in case it did not.
 
-% grab finish time
-fintime = cputime;
-elapsed = toc;
-% calculate Bootstrap analysis and Goodness of Fit analysis time
-fprintf('TIC TOC: %g\n', elapsed);
-fprintf('CPUTIME: %g\n', fintime - initime)
+% Skipping INF vaues for slope SD value estimation (needed if number of samples is low)
+paramsSim2 = paramsSim(isfinite((paramsSim(:,2))), 2);
+disp([â€˜Slope SD: ' num2str(std(paramsSim2))])
