@@ -1,4 +1,4 @@
-% Marcin J Marzejon�
+% Marcin J Marzejon
 % based on: "Psychophysics. A practical Introduction" by F.A.A. Kingdom, N.
 % Prisn, 2nd edition, Elsevier 2016, Chapter 4.2, pp. 56-71)
 
